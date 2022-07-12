@@ -5,7 +5,3 @@ output: html_document
 
 This is a project by Brian Wang analyzing data on various phone benchmarks based on their . It uses 
 a dataset from [kaggle](https://www.kaggle.com/datasets/alanjo/smartphone-processors-ranking?resource=download).
-
-Things to include in this README:
-- A description (1-2 sentences ) about your dataset
-- Your name 

@@ -1,0 +1,220 @@
+---
+title: "dplyr_review"
+output: html_document
+---
+
+## intro to dplyr
+
+dplyr is R package in tidyverse. We can load the package using
+
+```{r remedy001}
+
+#load req package
+library(tidyverse)
+# or really we can just do that all at once using library(tidyverse) but yea
+
+#preview dataset
+head(starwars)
+
+
+
+```
+
+
+### Filtering data
+We can filter data using `filter()`. This allows us to subset observations (rows) based on their values (in columns)
+
+Tips:
+
+* Be sure u spell the colnames correctly (and valnames if its a categorical variable). R is CASE SENSITIVE (at least for vars)
+* Equality is `==` when comparing observations. (`=` is an assignemnt operator for args)
+* You can use < > <= >= to compare numeric or categorical variables (nominal variables are ranked alphabetically, while ordinal variables have a built-in rank)
+
+```{r remedy002}
+
+filter(starwars, hair_color == "blond" | hair_color == "blonde") 
+
+filter(starwars, hair_color == "blond" & species == "Human")
+
+filteredData <- filter(starwars, skin_color == "fair", species == "Human", homeworld == "Tatooine")
+
+# filtering for a specific number or range of numbers
+
+filter(starwars, mass == 75)
+
+filter(starwars, mass >= 75, mass <= 100)
+
+# filtering to choose for everyone except for one value
+
+filter(starwars, mass != 75)
+
+# another way we can specify multiuple arguemnts is using the %in% with a vector
+
+filter(starwars, hair_color %in% c("blond", "blonde", "brown"))
+
+# another reason why %in% is cooler bc it checks all the conditions all at once, when "or" has to go one at a time
+# but or is useful when u have two separate conditioins, like hair color OR homeworld
+
+impPlanets <- c('Tatooine', 'Naboo', 'Alderaan')
+filter(starwars, homeworld %in% impPlanets)
+
+# we can use > <  <= >= and stoof with strings by doing things alphabetically
+
+#this will filter everyone whos name is before the letter n
+
+filter(starwars, name < "Mace")
+
+# talking more about ranked data
+# so often times we have to put in our own order with vectors
+# but someitmes it will have it built in, and we can look at that with head(), summary(), class(), unique() etc
+
+head(diamonds) # gives first 6 rows
+class(diamonds$cut) # gives u specific type of data kinda like mode
+summary(diamonds$cut) # gives you a count of each category or sumamry stats if numeric
+summary(diamonds$carat)
+head(diamonds$cut) #gives first 6 values and levels
+
+filter(diamonds, cut > "Good")
+
+## Ordering categorical data
+unique(starwars$eye_color)
+
+#factor() allows us to force categories into a ordered rank
+factor(starwars$eye_color, levels = c(1,2,3,4,5,6,7), labels = c("red", "orange", "gold", "yellow", "green,yellow", "blue", "black", ordered = T))
+
+# find all characters that are shorter than 100 cm
+
+filter(starwars, height < 100, species != "Droid")
+
+# which characters were bron between the years 100 and 200 (inclusive)
+
+filter(starwars, birth_year >= 100, birth_year <= 200)
+#faster and cleaner alternative
+filter(starwars, between(birth_year, 100, 200))
+
+
+# which characters weigh over 100kg but are shorter than 185cm?
+filter(starwars, mass > 100, height < 185)
+
+### Missing Values, get in the way when we do any summary math calculations
+NA > 5 # it doesnt know, NA could be anything
+NA + 10 
+NA/2
+ 
+NA == NA #this one is weird, these unkown values could be not equal to each other
+
+mass <- NA
+10 == mass # returns NA
+is.na(mass) # return TRUE
+
+# which characters are missing a hair color?
+filter(starwars, is.na(hair_color))
+
+```
+
+### Arranging data
+
+`arrange()` reorders rows. It doesnt remove or add rows. NA values are always at the end when you order by a col
+
+```{r remedy003}
+#lowest to highest birth year
+arrange(starwars, birth_year)
+
+#highest to lowest birth year
+arrange(starwars, desc(birth_year))
+
+#categorical is alphabetical
+arrange(starwars, hair_color)
+
+#multiple cols, will go by alphabetical / numerical within each group of the col
+
+arrange(starwars, hair_color, birth_year)
+
+# arrange starwars characters to find the tallest characters and shortest characters
+
+arrange(starwars, height)
+
+# Alphabetize the star wars characters by name
+
+arrange(starwars, name)
+
+# how could u use arrange() to sort all missing values to the start?
+arrange(starwars, desc(is.na(height)))
+```
+
+
+### we can select certain columns in the data set
+
+`select()` allows us to retain only certain variables (cols). Doesnt change order, but it removes not named in the args. So filter is for rows, and select is for cols.
+
+```{r remedy004}
+
+select(starwars, hair_color, skin_color, eye_color)
+
+head(starwars)
+# we can use a colon to select cols that are in order next to each other
+select(starwars, hair_color:eye_color)
+
+# to select everything except a certain col we can use the minus sign
+select(starwars, -(hair_color:eye_color))
+
+starwars_no_color <- select(starwars, -(hair_color:eye_color))
+
+# there are many helper functions to select
+select(starwars, contains("color"))
+select(starwars, ends_with("color")) # there is also starts with
+select(starwars, contains("_"))
+select(starwars, starts_with("s"), ends_with("color"))
+
+#more helper functions can be accessed with ?select
+?select
+
+# in filter, and select, the comma means different things. in select, comma is or, in filter, comma is and
+
+# to rename variables use rename()
+
+rename(starwars, birthYear = birth_year)
+
+# select the homeworld and species for the starwars data. What question might this subset of vars help answer?
+
+select(starwars, homeworld, species)
+
+# come up with as many ways to select these 4 vars
+select(starwars, hair_color, eye_color, skin_color, birth_year)
+select(starwars, hair_color:birth_year)
+select(starwars, ends_with("color"), birth_year)
+select(starwars, contains("_"))
+select(starwars, -(name:mass), -(sex:starships))
+select(starwars, ends_with("color"), ends_with("year"))
+
+```
+
+
+### adding new columns
+
+`mutate()` adds new columns to the end of ur dataset.
+
+```{r remedy005}
+# create smaller dataset to see new vars easier
+starwars_small <- select(starwars, height, mass, birth_year)
+head(starwars_small)
+
+starwars_small <- mutate(starwars_small, height_m = height/100)
+mutate(starwars_small, bmi = mass/(height_m^2))
+
+# we could have also done it straight in one line
+mutate(starwars_small, height_m = height/100, bmi = mass/(height_m^2))
+
+# to only keep new columns, use transmute()
+
+transmute(starwars_small, height_m = height/100, bmi = mass/(height_m^2))
+
+# using aggregate functions
+# need to use
+prop_mass <- mutate(starwars_small, proportional_mass = mass/sum(mass, na.rm = TRUE)) 
+arrange(prop_mass, desc(proportional_mass))
+
+```
+math operations are all vectorized and will apply to each row individually
+
+summary stats go a little differently and apply to the whole col

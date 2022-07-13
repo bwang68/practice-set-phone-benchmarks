@@ -1,6 +1,3 @@
-#### Load in csv file ####
-
-phone_benchmarks <- read.csv("data/ML_ALL_benchmarks.csv")
 
 ## practice plotting with data
 
@@ -11,4 +8,5 @@ ggplot(data = phone_benchmarks, aes(cpuScore)) +
   labs(x = "CPU Performance Score (higher is better)", y = "Count") +
   scale_fill_brewer(palette = "Reds") + 
   theme_dark()
+
 

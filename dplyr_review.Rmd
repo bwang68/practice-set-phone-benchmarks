@@ -169,6 +169,10 @@ select(starwars, starts_with("s"), ends_with("color"))
 #more helper functions can be accessed with ?select
 ?select
 
+# we can also use select() to reorder cols
+starwars %>% 
+  select(species, everything()) # this will put species first and put everything else later
+
 # in filter, and select, the comma means different things. in select, comma is or, in filter, comma is and
 
 # to rename variables use rename()
@@ -218,3 +222,106 @@ arrange(prop_mass, desc(proportional_mass))
 math operations are all vectorized and will apply to each row individually
 
 summary stats go a little differently and apply to the whole col
+
+## summarizing and grouping data
+`summarise()` collapses an entire column of data to a single value
+
+```{r remedy006}
+#similar to mutate syntax, u assign ur summary statistics to a new variable, which i mean, could just be "mean"
+summarise(starwars, mean_mass = mean(mass, na.rm = TRUE))
+
+# we can also collapse multiple columns into new sorta columns, sorta like just summary, no other information
+summarise(starwars,
+          mean_mass = mean(mass, na.rm = TRUE),
+          mean_height = mean(height, na.rm = TRUE))
+
+# summarise is also useful to summarise certain groups of data
+species_masses <- summarise(group_by(starwars, species),
+          mean_mass = mean(mass, na.rm = TRUE))
+
+arrange(species_masses, desc(mean_mass))
+#we see here that there is a NaN value which is sorta like NA but its saying there is compelelty no data here
+
+#another thing we can do with group by and summarise is n() which will give us a count of each group
+
+summarise(group_by(starwars, species),
+          mean_mass = mean(mass, na.rm = TRUE), 
+          count = n())
+
+# from this we can see that while there are some that are really heavy, there might only be one or two which can be outliers and not representitive of the whole population, meaning that the n() is something to consider when looking at averages and summary stats
+
+# the PIPE %>%, allows us to be more neat and less cramped, also looks cooler lol
+# %>% allows us to do things in steps, and allows the thing we pipe to be the input of the next function AFTER the pipe
+
+species_masses <- starwars %>% 
+  group_by(species) %>% 
+  summarise(mean_mass = mean(mass, na.rm = TRUE),
+            count = n()) %>% 
+  arrange(desc(mean_mass))
+
+
+species_masses
+```
+
+### sampling a designated # of rows
+`sample_n()` allows us to sample a random # of rows from our data. Sampling is Random
+
+```{r remedy007}
+starwars %>% 
+  sample_n(10)
+
+# random side note, to get the totla # of rows is nrow()
+
+nrow(starwars) # total # of rows is 87
+
+# u can also specify if u want duplicates, weight, etc., look at docs
+
+# we can also do a % of a dataset
+
+starwars_10percent <- starwars %>% 
+  sample_frac(0.1)
+
+```
+
+
+grouping before sampling will sample that amoutn for each group. so grouping by gender it will find four random rows from feminine, then masculine, then NAs.
+
+
+```{r remedy008}
+
+starwars %>% 
+  group_by(gender) %>% 
+  sample_n(4)
+
+```
+
+### Slicing
+
+we can also take a "slice" of our data using `slice()` and its related funcs. this retains the order of our rows in the dataset orginally, not random. 
+
+```{r remedy009}
+
+# slice by index value (row #)
+
+starwars %>% 
+  slice(50:60)
+
+# first 10 rows by index
+starwars %>% 
+  slice_head(n = 10)
+
+# last 10 rows by index
+starwars %>% 
+  slice_tail(n = 10)
+
+# rows with lowest 10 masses
+starwars %>% 
+  slice_min(order_by = mass, n = 10)
+
+# rows with heaviest 10 masses
+starwars %>% 
+  slice_max(order_by = mass, n = 10)
+
+
+```
+

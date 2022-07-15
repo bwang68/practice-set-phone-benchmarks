@@ -325,3 +325,47 @@ starwars %>%
 
 ```
 
+### t-test stats tutorial
+
+```{r remedy010}
+View(iris)
+
+# one sample t-test
+
+mean_sepal_length <- mean(iris$Sepal.Length)
+
+# create a arandom sample
+
+random_sample <- iris %>% 
+  sample_n(30)
+
+# null hypothesis
+# random sample mean is equal to the population mean (5.84333)
+
+# alt hyp
+# random sample mean is NOT equal to the population mean (5.84333)
+
+# one way we can test this is with a t-test
+
+random_sample_sep_len <- random_sample$Sepal.Length
+
+t.test(mu = mean_sepal_length, x = random_sample_sep_len)
+#after looking at t test we see that the p value is really high, indicating that it is highly likely that
+# we got this result by chance, so hm yea random sample is  indiciative of the population i think
+# cuz 94% means that there is a good chance if we randomly selected that hey this random sample is very indiciative of the population
+
+# but so wut if we just want to look at one species
+
+setosa <- iris %>% 
+  filter(Species == "setosa")
+
+setosa_sep_len <- setosa$Sepal.Length
+t.test(mu = mean_sepal_length, x = setosa_sep_len)
+# 16 standrard deviations away is craZY so this is not it
+# so we are saying that there is no chance that this is part of the general population
+# so this group is diff from the whole in some way
+# so the true mean of the setosa species, is not equal to that general average population mean
+
+# is the p-value less than 0.05? 
+
+```

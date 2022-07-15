@@ -60,10 +60,17 @@ android_only <- phone_benchmarks %>%
   #notice that ASUS and Asus are separate, need to join these grps together
   mutate(phone_company = str_replace(phone_company, "ASUS", "Asus"))
 
-
+# barplot of phone performance by company
 android_only  %>% 
-  ggplot(aes(phone_company, totalScore)) +
-  geom_boxplot()
+  arrange(desc(totalScore)) %>% 
+  ggplot(aes(reorder(phone_company, -totalScore), totalScore, fill = phone_company)) +
+  geom_bar(stat = "summary",
+           fun = "mean") + 
+  labs(x = "Phone Company",
+       y = "Phone CPU + GPU Score",
+       title = "Phone average performance scores by company (higher is better)") +
+  scale_fill_brewer(palette = "Set3") +
+  theme_light()
 
 
 #look at summary stats

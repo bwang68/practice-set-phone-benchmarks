@@ -2,6 +2,8 @@
 
 phone_benchmarks <- read.csv("data/ML_ALL_benchmarks.csv")
 
+#load library
+library(tidyverse)
 
 # saving as RDS allows us to use it as an object, which should be a lot smaller than the csv file
 saveRDS(phone_benchmarks, "data/phone_benchmarks.RDS") 

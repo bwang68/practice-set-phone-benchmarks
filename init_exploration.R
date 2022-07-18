@@ -68,7 +68,7 @@ android_only  %>%
            fun = "mean") + 
   labs(x = "Phone Company",
        y = "Phone CPU + GPU Score",
-       title = "Phone average performance scores by company (higher is better)") +
+       title = "Android Phone average performance scores by company (higher is better)") +
   scale_fill_brewer(palette = "Set3") +
   theme_light()
 
@@ -79,5 +79,11 @@ android_only %>%
   group_by(phone_company) %>% 
   summarize(mean_total_score = mean(totalScore, na.rm = TRUE))
 
+# practice with anova
 
+benchmarks_score_company <- aov(data = phone_benchmarks, cpuScore ~ company)
+summary(benchmarks_score_company)
+TukeyHSD(benchmarks_score_company)
+signif_results <- TukeyHSD(benchmarks_score_company)$company
+arrange(as.data.frame(signif_results), desc(`p adj`))
 
